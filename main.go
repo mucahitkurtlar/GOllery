@@ -20,6 +20,8 @@ func main() {
 	r.PathPrefix("/static/").Handler(http.StripPrefix("/static/", fs))
 
 	r.HandleFunc("/", indexHandler)
+	r.HandleFunc("/upload", uploadHandler)
+	r.HandleFunc("/download", downloadHandler)
 	http.Handle("/", r)
 
 	fmt.Println("Listening on port 8080")
@@ -35,4 +37,14 @@ func main() {
 func indexHandler(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 	templates.ExecuteTemplate(w, "index.html", nil)
+}
+
+func uploadHandler(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusOK)
+	templates.ExecuteTemplate(w, "upload.html", nil)
+}
+
+func downloadHandler(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusOK)
+	templates.ExecuteTemplate(w, "download.html", nil)
 }
