@@ -10,6 +10,7 @@ import (
 	"github.com/gorilla/mux"
 )
 
+//login test
 var templates *template.Template
 
 func main() {
