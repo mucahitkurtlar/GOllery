@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"html/template"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"time"
@@ -10,7 +11,6 @@ import (
 	"github.com/gorilla/mux"
 )
 
-//login test
 var templates *template.Template
 
 func main() {
@@ -21,6 +21,7 @@ func main() {
 
 	r.HandleFunc("/", indexHandler)
 	r.HandleFunc("/upload", uploadHandler)
+	r.HandleFunc("/upload-video", uploadVideoHandler)
 	r.HandleFunc("/download", downloadHandler)
 	http.Handle("/", r)
 
@@ -47,4 +48,31 @@ func uploadHandler(w http.ResponseWriter, r *http.Request) {
 func downloadHandler(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 	templates.ExecuteTemplate(w, "download.html", nil)
+}
+func uploadVideoHandler(w http.ResponseWriter, r *http.Request) {
+	r.ParseMultipartForm(10 << 20)
+	file, handler, err := r.FormFile("myFile")
+	if err != nil {
+		log.Fatal(err)
+		return
+	}
+	defer file.Close()
+
+	fmt.Printf("Uploaded File: %+v\n", handler.Filename)
+	fmt.Printf("File Size: %+v\n", handler.Size)
+	fmt.Printf("MIME Header: %+v\n", handler.Header)
+
+	tempFile, err := ioutil.TempFile("videos", "upload-*.mp4")
+	if err != nil {
+		fmt.Println(err)
+	}
+	defer tempFile.Close()
+
+	fileBytes, err := ioutil.ReadAll(file)
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	tempFile.Write(fileBytes)
+	fmt.Fprintf(w, "Successfully Uploaded File\n")
 }
