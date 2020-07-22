@@ -56,6 +56,10 @@ func watchHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func uploadVideoHandler(w http.ResponseWriter, r *http.Request) {
+	uploadVideos(w, r)
+}
+
+func uploadVideo(w http.ResponseWriter, r *http.Request) {
 	r.ParseMultipartForm(10 << 20)
 	file, handler, err := r.FormFile("myFile")
 	if err != nil {
@@ -70,15 +74,48 @@ func uploadVideoHandler(w http.ResponseWriter, r *http.Request) {
 
 	tempFile, err := ioutil.TempFile("videos", "upload-*.mp4")
 	if err != nil {
-		fmt.Println(err)
+		log.Fatal(err)
+		return
 	}
 	defer tempFile.Close()
 
 	fileBytes, err := ioutil.ReadAll(file)
 	if err != nil {
-		fmt.Println(err)
+		log.Fatal(err)
+		return
 	}
 
 	tempFile.Write(fileBytes)
-	fmt.Fprintf(w, "Successfully Uploaded File\n")
+	fmt.Fprintf(w, "File uploaded\n")
+}
+
+func uploadVideos(w http.ResponseWriter, r *http.Request) {
+	r.ParseMultipartForm(10 << 20)
+	files := r.MultipartForm.File["myFiles"]
+
+	for _, file := range files {
+		f, _ := file.Open()
+
+		fmt.Printf("Uploaded File: %+v\n", file.Filename)
+		fmt.Printf("File Size: %+v\n", file.Size)
+		fmt.Printf("MIME Header: %+v\n", file.Header)
+		fmt.Println("----------------------------------")
+
+		tempFile, err := ioutil.TempFile("videos", "upload-*.mp4")
+		if err != nil {
+			log.Fatal(err)
+			return
+		}
+		defer tempFile.Close()
+
+		fileBytes, err := ioutil.ReadAll(f)
+		if err != nil {
+			log.Fatal(err)
+			return
+		}
+
+		tempFile.Write(fileBytes)
+		fmt.Fprintf(w, "Uploaded file: %+v\n", file.Filename)
+	}
+
 }
