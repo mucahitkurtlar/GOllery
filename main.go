@@ -51,8 +51,9 @@ func uploadHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func watchHandler(w http.ResponseWriter, r *http.Request) {
+	var arr = []int{1, 2, 3}
 	w.WriteHeader(http.StatusOK)
-	templates.ExecuteTemplate(w, "watch.html", nil)
+	templates.ExecuteTemplate(w, "watch.html", arr)
 }
 
 func uploadVideoHandler(w http.ResponseWriter, r *http.Request) {
