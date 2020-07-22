@@ -15,14 +15,19 @@ var templates *template.Template
 
 func main() {
 	templates = template.Must(template.ParseGlob("templates/*.html"))
-	fs := http.FileServer(http.Dir("./static/"))
+
 	r := mux.NewRouter()
+
+	fs := http.FileServer(http.Dir("./static/"))
 	r.PathPrefix("/static/").Handler(http.StripPrefix("/static/", fs))
+
+	vs := http.FileServer(http.Dir("./videos/"))
+	r.PathPrefix("/videos/").Handler(http.StripPrefix("/videos/", vs))
 
 	r.HandleFunc("/", indexHandler)
 	r.HandleFunc("/upload", uploadHandler)
 	r.HandleFunc("/upload-video", uploadVideoHandler)
-	r.HandleFunc("/download", downloadHandler)
+	r.HandleFunc("/watch", watchHandler)
 	http.Handle("/", r)
 
 	fmt.Println("Listening on port 8080")
@@ -45,10 +50,11 @@ func uploadHandler(w http.ResponseWriter, r *http.Request) {
 	templates.ExecuteTemplate(w, "upload.html", nil)
 }
 
-func downloadHandler(w http.ResponseWriter, r *http.Request) {
+func watchHandler(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
-	templates.ExecuteTemplate(w, "download.html", nil)
+	templates.ExecuteTemplate(w, "watch.html", nil)
 }
+
 func uploadVideoHandler(w http.ResponseWriter, r *http.Request) {
 	r.ParseMultipartForm(10 << 20)
 	file, handler, err := r.FormFile("myFile")
